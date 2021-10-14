@@ -23,13 +23,13 @@ def double_conv_3d(in_f, out_f):
         nn.ReLU(inplace=True)
     ])
 
-class UNET3D(nn.Module):
+class UNet3D(nn.Module):
     def __init__(
             self, 
             in_c = 4,  # number of channels: t1, t1ce, t2, flair
             out_c = 4,  # number of classes: background, edema, non-enhancing, GD-enhancing
             n_f = [64, 128, 256, 512]):  # default for UNET
-        super(UNET3D, self).__init__()
+        super(UNet3D, self).__init__()
         
         # initialise member vars
         self.in_channels = in_c
@@ -38,17 +38,16 @@ class UNET3D(nn.Module):
         
         # generate layers
         self.contracting_layers = nn.ModuleList()
-        self.bottleneck_layers = nn.ModuleList()
         self.expanding_layers = nn.ModuleList()
         
         # generate contracting layers
-        self.contracting_layers += double_conv_3d(self.in_channels, self.n_features[0])
+        self.contracting_layers.append(double_conv_3d(self.in_channels, self.n_features[0]))
         self.contracting_layers.append(nn.MaxPool3d(kernel_size=2, stride=2))
         
         for n in range(len(self.n_features) - 1):
             in_n = self.n_features[n]
             out_n = self.n_features[n + 1]
-            self.contracting_layers += double_conv_3d(in_n, out_n)
+            self.contracting_layers.append(double_conv_3d(in_n, out_n))
             self.contracting_layers.append(nn.MaxPool3d(kernel_size=2, stride=2))
         
         # generating the bottleneck layer
@@ -62,7 +61,7 @@ class UNET3D(nn.Module):
                     n, 
                     kernel_size=2, 
                     stride=2))
-            self.expanding_layers += double_conv_3d(n * 2, n)
+            self.expanding_layers.append(double_conv_3d(n * 2, n))
         
         # compresses numerous feature channels down to one channel per class
         self.output_layer = nn.Conv3d(
@@ -71,11 +70,61 @@ class UNET3D(nn.Module):
             kernel_size = 1, 
             stride = 1, 
             bias = False)
-
+    
+    # x is passed in as [batch, input channels, dimensions]
+    def forward(self, x):
+        skipped_connections = []
+        
+        # run the contracting layers
+        for layer in self.contracting_layers:
+            if type(layer) == nn.ModuleList:
+                for module in layer:
+                    x = module(x)
+                skipped_connections.append(x)
+            else:
+                x = layer(x)
+        
+        # run the bottleneck layer
+        for module in self.bottleneck_layer:
+            x = module(x)
+        
+        # run the extracting layers
+        for layer in self.expanding_layers:
+            if type(layer) == nn.ModuleList:
+                spatial_data = skipped_connections.pop()
+                
+                # if your input is of the wrong dimension,
+                # it will need to be reshaped
+                if x.shape != spatial_data.shape:
+                    if spatial_data.shape[2] < x.shape[2]:
+                        for i in range(2, len(spatial_data.shape)):
+                            x = x.narrow(i, 0, spatial_data.shape[i])
+                    if spatial_data.shape[2] > x.shape[2]:
+                        for i in range(2, len(x.shape)):
+                            spatial_data = spatial_data.narrow(i, 0, x.shape[i])
+                
+                # add spatial information
+                x = torch.cat((spatial_data, x), dim=1)
+                
+                for module in layer:
+                    x = module(x)
+            else:
+                x = layer(x)
+        
+        # compress features down to number of output channels
+        x = self.output_layer(x)
+                
+        return x
 
 if __name__ == "__main__":
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(device)
+    DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+    print(DEVICE)
 
-    test_model = UNET3D().to(device)
-    print(test_model)
+    test_model = UNet3D().to(DEVICE)
+    # print("model architecture = "+ str(test_model))
+    x = torch.rand(1, 4, 64, 64, 64).to(DEVICE)
+    y = torch.rand(1, 4, 63, 63, 63).to(DEVICE)
+    z = torch.rand(1, 4, 65, 65, 65).to(DEVICE)
+    print("output shape x = " + str(test_model(x).shape))
+    print("output shape y = " + str(test_model(y).shape))
+    print("output shape z = " + str(test_model(z).shape))
