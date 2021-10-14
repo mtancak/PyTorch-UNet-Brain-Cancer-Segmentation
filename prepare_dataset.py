@@ -30,6 +30,7 @@ class DatasetCreator:
                     if p == "seg_channel_name":
                         self.seg_channel_name = v
                         
+    # remove images where there is too little non-bg data
     def bg_threshold(self):
         if not self.do_bg_threshold:
             return
@@ -42,7 +43,6 @@ class DatasetCreator:
             print("uniques = " + str(uniques))
             uniques = uniques / np.sum(uniques)
         
-            # remove images where there is too little non-bg data
             if np.max(uniques) > 0.99:
                 self.sample_names.remove(sample_name)
 
