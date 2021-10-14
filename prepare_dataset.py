@@ -2,14 +2,6 @@ import os
 import numpy as np
 import nibabel as nib
 
-'''self,
-in_data_dir,
-out_training_dir, 
-out_validation_dir, 
-channel_names, 
-segmentation_channel_name,
-min_data_dimension = 64):'''
-
 # a class that will take raw data directories and prepare
 # the data for training
 class DatasetCreator:
