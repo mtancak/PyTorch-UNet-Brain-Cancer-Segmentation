@@ -169,6 +169,7 @@ class DatasetCreator:
                 print("patches saved: " + str(count_patches))
                                 
 
+    # run the dataset generation with the () operator
     def __call__(self):
         self.sample_names = os.listdir(self.input_data_dir)
         
