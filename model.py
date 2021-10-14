@@ -51,6 +51,9 @@ class UNET3D(nn.Module):
             self.contracting_layers += double_conv_3d(in_n, out_n)
             self.contracting_layers.append(nn.MaxPool3d(kernel_size=2, stride=2))
         
+        # generating the bottleneck layer
+        self.bottleneck_layer = double_conv_3d(self.n_features[-1], self.n_features[-1] * 2)
+        
         # generate expanding layers
         for n in reversed(self.n_features):
             self.expanding_layers.append(
