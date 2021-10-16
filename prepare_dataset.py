@@ -2,7 +2,6 @@ import os
 import numpy as np
 import nibabel as nib
 from sklearn.model_selection import train_test_split
-import matplotlib.pyplot as plt
 
 # https://stackoverflow.com/a/31402351
 def bbox2_3D(img):
