@@ -2,6 +2,7 @@ import os
 import numpy as np
 import nibabel as nib
 from sklearn.model_selection import train_test_split
+from tqdm import tqdm  # progress bar
 
 
 # https://stackoverflow.com/a/31402351
@@ -145,8 +146,7 @@ class DatasetCreator:
             else:
                 samples = val_samples
                 loc = self.output_validation_dir
-            for sample in samples:
-                print("saving sample: " + str(sample))
+            for sample in (tqdm(self.sample_names)):
                 seg_data, data, bounds, dims = self.load_data(sample)
                 
                 if seg_data is None:
@@ -182,8 +182,6 @@ class DatasetCreator:
                                         str(count_patches) + ".npy", patch_seg)
                             
                             count_patches += 1
-                            
-                print("patches saved: " + str(count_patches))
     
     # run the dataset generation with the () operator
     def __call__(self):
