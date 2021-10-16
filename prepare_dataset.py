@@ -3,6 +3,7 @@ import numpy as np
 import nibabel as nib
 from sklearn.model_selection import train_test_split
 
+
 # https://stackoverflow.com/a/31402351
 def bbox2_3D(img):
     r = np.any(img, axis=(1, 2))
@@ -16,7 +17,9 @@ def bbox2_3D(img):
     return (np.array([rmin, rmax, cmin, cmax, zmin, zmax]), 
             np.array([rmax - rmin, cmax - cmin, zmax - zmin]))
 
+
 SAVE = True
+
 
 # a class that will take raw data directories and prepare
 # the data for training
@@ -181,8 +184,7 @@ class DatasetCreator:
                             count_patches += 1
                             
                 print("patches saved: " + str(count_patches))
-                                
-
+    
     # run the dataset generation with the () operator
     def __call__(self):
         self.sample_names = os.listdir(self.input_data_dir)

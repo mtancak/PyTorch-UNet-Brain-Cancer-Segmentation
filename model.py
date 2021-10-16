@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 # returns a modulelist used for a single layer of a UNET architecture
 def double_conv_3d(in_f, out_f):
     return nn.ModuleList([
@@ -115,6 +116,7 @@ class UNet3D(nn.Module):
         x = self.output_layer(x)
                 
         return x
+
 
 if __name__ == "__main__":
     DEVICE = "cuda" if torch.cuda.is_available() else "cpu"

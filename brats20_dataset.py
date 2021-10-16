@@ -4,6 +4,7 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 
+
 class BraTS20Dataset(Dataset):
     def __init__(self, set_dir, data_dir, seg_dir, extension):
         self.set_dir = set_dir
