@@ -31,6 +31,8 @@ class DatasetCreator:
         self.seg_channel_name = "seg"
         self.sample_names = []
         self.save_thresholded_sample_name = False
+        self.data_dir_n = ""
+        self.seg_dir_n = ""
         
         if isinstance(hp_fn, str):
             with open(hp_fn, "r") as hp:
@@ -54,6 +56,19 @@ class DatasetCreator:
                         self.min_patch_size = int(v)
                     if p == "channel_names":
                         self.channel_names = v.split(",")
+                    if p == "data_dir_n":
+                        self.data_dir_n = v
+                    if p == "seg_dir_n":
+                        self.seg_dir_n = v
+        
+        if not os.path.isdir(self.output_training_dir + self.data_dir_n):
+            os.mkdir(self.output_training_dir + self.data_dir_n)
+        if not os.path.isdir(self.output_training_dir + self.seg_dir_n):
+            os.mkdir(self.output_training_dir + self.seg_dir_n)
+        if not os.path.isdir(self.output_validation_dir + self.data_dir_n):
+            os.mkdir(self.output_validation_dir + self.data_dir_n)
+        if not os.path.isdir(self.output_validation_dir + self.seg_dir_n):
+            os.mkdir(self.output_validation_dir + self.seg_dir_n)
                         
     # remove images where there is too little non-bg data
     def bg_threshold(self):
@@ -98,7 +113,7 @@ class DatasetCreator:
         dims //= self.min_patch_size
         for d in dims:
             if d <= 0:
-                return [], [], [], []
+                return None, None, None, None
         
         patch_channels = []
         for channel in self.channel_names:
@@ -131,7 +146,7 @@ class DatasetCreator:
                 print("saving sample: " + str(sample))
                 seg_data, data, bounds, dims = self.load_data(sample)
                 
-                if seg_data == []:
+                if seg_data is None:
                     continue
                 
                 count_patches = 0
@@ -158,9 +173,9 @@ class DatasetCreator:
                             
                             
                             if SAVE:
-                                np.save(loc + sample + "__data_" + 
+                                np.save(loc + self.data_dir_n + sample + "_" +
                                         str(count_patches) + ".npy", patch)
-                                np.save(loc + sample + "__mask_" + 
+                                np.save(loc + self.seg_dir_n + sample + "_" +
                                         str(count_patches) + ".npy", patch_seg)
                             
                             count_patches += 1
