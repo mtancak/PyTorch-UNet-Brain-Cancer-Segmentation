@@ -15,8 +15,24 @@ BATCH_SIZE = 1
 NUMBER_OF_EPOCHS = 5
 
 
+# measures accuracy of a model at the end of an epoch (bad for semantic segmentation)
+def accuracy(model, loader):
+    correct_pixels = 0
+    total_pixels = 0
+
+    with torch.no_grad():
+        for data, mask in loader:
+            pred = model(data)
+            pred = torch.argmax(pred, dim=1)
+            correct_pixels += (pred == mask).sum()
+            total_pixels += torch.numel(pred)
+
+    return (correct_pixels / total_pixels).item()
+
+# a training loop that runs a number of training epochs on a model
 def train(model, loss_function, optimizer, train_loader, validation_loader):
-    for epoch in range(NUMBER_OF_EPOCHS):    
+    for epoch in range(NUMBER_OF_EPOCHS):
+        model.train()
         progress = tqdm(train_loader)
         
         for batch, (data, seg), in enumerate(progress):
@@ -31,6 +47,8 @@ def train(model, loss_function, optimizer, train_loader, validation_loader):
             loss.backward()
             optimizer.step()
 
+        model.eval()
+        print("Accuracy for epoch (" + str(epoch) + ") is: " + str(accuracy(model, validation_loader)))
 
 if __name__ == "__main__":
     # create model
@@ -59,5 +77,5 @@ if __name__ == "__main__":
         batch_size = 1,
         num_workers = 0,
         shuffle = False)
-    
+
     train(model, loss_function, optimizer, train_loader, validation_loader)
