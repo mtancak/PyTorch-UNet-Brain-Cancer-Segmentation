@@ -111,6 +111,7 @@ class DatasetCreator:
     def load_data(self, sample):
         seg_data = nib.load(self.input_data_dir + sample + "/" + 
             sample + "_" + self.seg_channel_name + ".nii").get_fdata()
+        seg_data[seg_data == 4] = 3  # 3rd class is labelled as 4
         
         bounds, dims = bbox2_3D(seg_data)
         # check if it's possible to get at least 1 patch
