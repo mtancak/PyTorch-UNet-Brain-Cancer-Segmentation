@@ -147,7 +147,7 @@ class DatasetCreator:
             else:
                 samples = val_samples
                 loc = self.output_validation_dir
-            for sample in (tqdm(self.sample_names)):
+            for sample in (tqdm(samples)):
                 seg_data, data, bounds, dims = self.load_data(sample)
                 
                 if seg_data is None:
