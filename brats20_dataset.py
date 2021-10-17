@@ -6,11 +6,10 @@ import matplotlib.pyplot as plt
 
 
 class BraTS20Dataset(Dataset):
-    def __init__(self, set_dir, data_dir, seg_dir, extension):
+    def __init__(self, set_dir, data_dir, seg_dir):
         self.set_dir = set_dir
         self.data_dir = data_dir
         self.seg_dir = seg_dir
-        self.extension = extension
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
         self.list_samples = os.listdir(self.set_dir + self.data_dir)
@@ -20,15 +19,15 @@ class BraTS20Dataset(Dataset):
                           "different file names!")
     
     def __len__(self):
-        return len(self.list_of_images)
+        return len(self.list_samples)
     
     def __getitem__(self, index):
         data_img_path = self.set_dir + self.data_dir + self.list_samples[index]
         seg_img_path = self.set_dir + self.seg_dir + self.list_samples[index]
         image = np.load(data_img_path)
         mask = np.load(seg_img_path)
-        image = torch.tensor(image, dtype=torch.float64, device=self.device)
-        mask = torch.tensor(mask, dtype=torch.float64, device=self.device)
+        image = torch.tensor(image, dtype=torch.float32, device=self.device)
+        mask = torch.tensor(mask, dtype=torch.int64, device=self.device)
         return image, mask
 
 
@@ -36,8 +35,7 @@ if __name__ == "__main__":
     ds = BraTS20Dataset(
         set_dir="C:/Users/Milan/Documents/Fast_Datasets/BraTS20/prep/train/",
         data_dir="data/",
-        seg_dir="mask/",
-        extension=".npy")
+        seg_dir="mask/")
     plt.imshow(ds[0][0][0][10].cpu().numpy())
     plt.show()
     plt.imshow(ds[0][0][1][10].cpu().numpy())
