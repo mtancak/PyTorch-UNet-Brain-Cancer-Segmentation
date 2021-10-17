@@ -1,4 +1,5 @@
 .idea/
+__pycache__/
 notepad.py
 hyperparameters.txt
 sample_names.npy
