@@ -90,9 +90,10 @@ class UNet3D(nn.Module):
             x = module(x)
         
         # run the extracting layers
+        up_moves = 0
         for layer in self.expanding_layers:
             if type(layer) == nn.ModuleList:
-                spatial_data = skipped_connections.pop()
+                spatial_data = skipped_connections[-(up_moves + 1)]
                 
                 # if your input is of the wrong dimension,
                 # it will need to be reshaped
@@ -109,6 +110,7 @@ class UNet3D(nn.Module):
                 
                 for module in layer:
                     x = module(x)
+                up_moves += 1
             else:
                 x = layer(x)
         
