@@ -69,8 +69,7 @@ class UNet3D(nn.Module):
             in_channels = list(reversed(self.n_features))[-1],  # same as n_features[0]
             out_channels = self.out_channels, 
             kernel_size = 1, 
-            stride = 1, 
-            bias = False)
+            stride = 1)
     
     # x is passed in as [batch, input channels, dimensions]
     def forward(self, x):
