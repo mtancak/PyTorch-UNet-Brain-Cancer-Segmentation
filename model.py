@@ -29,7 +29,9 @@ class UNet3D(nn.Module):
             self, 
             in_channels = 4,  # number of channels: t1, t1ce, t2, flair
             out_channels = 4,  # number of classes: background, edema, non-enhancing, GD-enhancing
-            n_features = [64, 128, 256, 512]):  # default for UNET
+            n_features = [64, 128, 256, 512],
+            activation = nn.Sigmoid()
+            ):  # default for UNET
         super(UNet3D, self).__init__()
         
         # initialise member vars
@@ -70,6 +72,8 @@ class UNet3D(nn.Module):
             out_channels = self.out_channels, 
             kernel_size = 1, 
             stride = 1)
+
+        self.activation = activation
     
     # x is passed in as [batch, input channels, dimensions]
     def forward(self, x):
@@ -116,7 +120,7 @@ class UNet3D(nn.Module):
         # compress features down to number of output channels
         x = self.output_layer(x)
                 
-        return x
+        return self.activation(x)
 
 
 if __name__ == "__main__":
