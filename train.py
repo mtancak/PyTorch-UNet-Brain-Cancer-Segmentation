@@ -16,13 +16,17 @@ LEARNING_RATE = 0.0001
 BATCH_SIZE = 1
 NUMBER_OF_EPOCHS = 100
 
+
+# converts an array into a one hot vector. Source: https://stackoverflow.com/questions/36960320/convert-a-2d-matrix-to-a-3d-one-hot-matrix-numpy
 def onehot_initialization_v2(a, ncols=4):
     out = torch.zeros(a.numel(), ncols)
     out[torch.arange(a.numel()), a.ravel()] = 1
     return out.to(device=DEVICE)
 
+# the f1 score in this paper uses a slightly modified way of computing the union which should result in a better f1 score for datasets with large class imbalance
+# https://arxiv.org/pdf/1606.04797.pdf
 def f1(probability, targets):
-    probability = nn.Sigmoid()(probability.flatten())
+    probability = probability.flatten()
     targets = targets.flatten()
     assert (probability.shape == targets.shape)
 
