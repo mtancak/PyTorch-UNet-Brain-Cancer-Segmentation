@@ -14,7 +14,10 @@ from brats20_dataset import BraTS20Dataset
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LEARNING_RATE = 0.0001
 BATCH_SIZE = 1
-NUMBER_OF_EPOCHS = 100
+NUMBER_OF_EPOCHS = 1000
+SAVE_EVERY_X_EPOCHS = 5
+SAVE_MODEL_LOC = "./model_"
+LOAD_MODEL_LOC = None
 
 
 # converts an array into a one hot vector. Source: https://stackoverflow.com/questions/36960320/convert-a-2d-matrix-to-a-3d-one-hot-matrix-numpy
@@ -88,18 +91,22 @@ def train(model, loss_function, optimizer, train_loader, validation_loader):
         model.eval()
         print("Accuracy for epoch (" + str(epoch) + ") is: " + str(accuracy(model, validation_loader)))
         print("F1 Score for epoch (" + str(epoch) + ") is: " + str(f1_metric(model, validation_loader)))
-        plt.imshow(data[0][0][20].detach().cpu().numpy())
-        plt.show()
-        plt.imshow(torch.argmax(pred, dim=1)[0][20].detach().cpu().numpy())
-        plt.show()
-        plt.imshow(seg2[0][20].detach().cpu().numpy())
-        plt.show()
-        plt.imshow(data[0][0][20].detach().cpu().numpy())
-        plt.show()
-        plt.imshow(torch.argmax(pred, dim=1)[0][20].detach().cpu().numpy())
-        plt.show()
-        plt.imshow(seg2[0][20].detach().cpu().numpy())
-        plt.show()
+
+        if (epoch % SAVE_EVERY_X_EPOCHS):
+            torch.save(model + str(epoch), SAVE_MODEL_LOC)
+
+        # plt.imshow(data[0][0][20].detach().cpu().numpy())
+        # plt.show()
+        # plt.imshow(torch.argmax(pred, dim=1)[0][20].detach().cpu().numpy())
+        # plt.show()
+        # plt.imshow(seg2[0][20].detach().cpu().numpy())
+        # plt.show()
+        # plt.imshow(data[0][0][20].detach().cpu().numpy())
+        # plt.show()
+        # plt.imshow(torch.argmax(pred, dim=1)[0][20].detach().cpu().numpy())
+        # plt.show()
+        # plt.imshow(seg2[0][20].detach().cpu().numpy())
+        # plt.show()
     print("Final Accuracy for epoch is: " + str(accuracy(model, validation_loader)))
     print("Final DSC Score for epoch is: " + str(f1_metric(model, validation_loader)))
     print("Print: ")
@@ -107,8 +114,11 @@ def train(model, loss_function, optimizer, train_loader, validation_loader):
 
 
 if __name__ == "__main__":
-    # create model
+    # create/load model
     model = UNet3D(in_channels=4, out_channels=4).to(DEVICE)
+
+    if LOAD_MODEL_LOC != None:
+        model.load_state_dict(torch.load(LOAD_MODEL_LOC))
 
     loss_function = f1
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
