@@ -15,7 +15,7 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LEARNING_RATE = 0.0001
 BATCH_SIZE = 1
 NUMBER_OF_EPOCHS = 1000
-SAVE_EVERY_X_EPOCHS = 5
+SAVE_EVERY_X_EPOCHS = 15
 SAVE_MODEL_LOC = "./model_"
 LOAD_MODEL_LOC = None
 
@@ -48,7 +48,7 @@ def f1_metric(model, loader):
 
     f1_score /= len(loader)
 
-    return f1_score
+    return f1_score.item()
 
 # measures accuracy of predictions at the end of an epoch (bad for semantic segmentation)
 def accuracy(model, loader, prin=False):
@@ -67,6 +67,10 @@ def accuracy(model, loader, prin=False):
 
 # a training loop that runs a number of training epochs on a model
 def train(model, loss_function, optimizer, train_loader, validation_loader):
+    model_metric_scores = {}
+    model_metric_scores["accuracy"] = []
+    model_metric_scores["f1"] = []
+
     for epoch in range(NUMBER_OF_EPOCHS):
         model.train()
         progress = tqdm(train_loader)
@@ -89,12 +93,23 @@ def train(model, loss_function, optimizer, train_loader, validation_loader):
             optimizer.step()
 
         model.eval()
-        print("Accuracy for epoch (" + str(epoch) + ") is: " + str(accuracy(model, validation_loader)))
-        print("F1 Score for epoch (" + str(epoch) + ") is: " + str(f1_metric(model, validation_loader)))
 
-        if (epoch % SAVE_EVERY_X_EPOCHS):
-            torch.save(model + str(epoch), SAVE_MODEL_LOC)
+        model_metric_scores["accuracy"].append(accuracy(model, validation_loader))
+        model_metric_scores["f1"].append(f1_metric(model, validation_loader))
 
+        print("Accuracy for epoch (" + str(epoch) + ") is: " + str(model_metric_scores["accuracy"][-1]))
+        print("F1 Score for epoch (" + str(epoch) + ") is: " + str(model_metric_scores["f1"][-1]))
+
+        if (epoch % SAVE_EVERY_X_EPOCHS == 0 and SAVE_MODEL_LOC):
+            torch.save(model.state_dict(), SAVE_MODEL_LOC + str(epoch))
+
+        plt.scatter(range(0, epoch+1), model_metric_scores["accuracy"])
+        plt.title("accuracy")
+        plt.show()
+        plt.scatter(range(0, epoch+1), model_metric_scores["f1"])
+        plt.title("f1")
+        plt.show()
+        
         # plt.imshow(data[0][0][20].detach().cpu().numpy())
         # plt.show()
         # plt.imshow(torch.argmax(pred, dim=1)[0][20].detach().cpu().numpy())
