@@ -75,7 +75,7 @@ def train(model, loss_function, optimizer, train_loader, validation_loader):
         model.train()
         progress = tqdm(train_loader)
         
-        for batch, (data, seg2), in enumerate(progress):
+        for batch, (data, seg2) in enumerate(progress):
             pred = model(data)
             seg = onehot_initialization_v2(seg2)
             seg = torch.reshape(seg, (1, 64, 64, 64, 4))
@@ -109,23 +109,9 @@ def train(model, loss_function, optimizer, train_loader, validation_loader):
         plt.scatter(range(0, epoch+1), model_metric_scores["f1"])
         plt.title("f1")
         plt.show()
-        
-        # plt.imshow(data[0][0][20].detach().cpu().numpy())
-        # plt.show()
-        # plt.imshow(torch.argmax(pred, dim=1)[0][20].detach().cpu().numpy())
-        # plt.show()
-        # plt.imshow(seg2[0][20].detach().cpu().numpy())
-        # plt.show()
-        # plt.imshow(data[0][0][20].detach().cpu().numpy())
-        # plt.show()
-        # plt.imshow(torch.argmax(pred, dim=1)[0][20].detach().cpu().numpy())
-        # plt.show()
-        # plt.imshow(seg2[0][20].detach().cpu().numpy())
-        # plt.show()
+
     print("Final Accuracy for epoch is: " + str(accuracy(model, validation_loader)))
     print("Final DSC Score for epoch is: " + str(f1_metric(model, validation_loader)))
-    print("Print: ")
-    # print_predictions(model, validation_loader)
 
 
 if __name__ == "__main__":
