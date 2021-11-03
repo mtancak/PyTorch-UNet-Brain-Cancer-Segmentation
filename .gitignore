@@ -4,3 +4,4 @@ notepad.py
 hyperparameters.txt
 sample_names.npy
 model_*
+eval_model.py
