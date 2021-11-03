@@ -1,22 +1,9 @@
 import os
 import numpy as np
-import nibabel as nib
 from sklearn.model_selection import train_test_split
+import nibabel as nib  # reading .nii files
 from tqdm import tqdm  # progress bar
-
-
-# https://stackoverflow.com/a/31402351
-def bbox2_3D(img):
-    r = np.any(img, axis=(1, 2))
-    c = np.any(img, axis=(0, 2))
-    z = np.any(img, axis=(0, 1))
-
-    rmin, rmax = np.where(r)[0][[0, -1]]
-    cmin, cmax = np.where(c)[0][[0, -1]]
-    zmin, zmax = np.where(z)[0][[0, -1]]
-
-    return (np.array([rmin, rmax, cmin, cmax, zmin, zmax]), 
-            np.array([rmax - rmin, cmax - cmin, zmax - zmin]))
+import patchify  # splits dataset into patches
 
 
 SAVE = True
@@ -112,14 +99,7 @@ class DatasetCreator:
         seg_data = nib.load(self.input_data_dir + sample + "/" + 
             sample + "_" + self.seg_channel_name + ".nii").get_fdata()
         seg_data[seg_data == 4] = 3  # 3rd class is labelled as 4
-        
-        bounds, dims = bbox2_3D(seg_data)
-        # check if it's possible to get at least 1 patch
-        dims //= self.min_patch_size
-        for d in dims:
-            if d <= 0:
-                return None, None, None, None
-        
+
         patch_channels = []
         for channel in self.channel_names:
             patch_channels.append( nib.load(self.input_data_dir + 
@@ -127,7 +107,7 @@ class DatasetCreator:
         
         data = np.stack(np.array(patch_channels), axis=0)
                             
-        return seg_data, data, bounds, dims
+        return seg_data, data
 
     # save data in target output directories
     def save(self):
@@ -148,41 +128,30 @@ class DatasetCreator:
                 samples = val_samples
                 loc = self.output_validation_dir
             for sample in (tqdm(samples)):
-                seg_data, data, bounds, dims = self.load_data(sample)
+                seg_data, data = self.load_data(sample)
                 
                 if seg_data is None:
                     continue
-                
-                count_patches = 0
-                for x in range(dims[0]):
-                    x_start = bounds[0] + x * self.min_patch_size
-                    x_end = x_start + self.min_patch_size
-                    for y in range(dims[1]):
-                        y_start = bounds[2] + y * self.min_patch_size
-                        y_end = y_start + self.min_patch_size
-                        for z in range(dims[2]):
-                            z_start = bounds[4] + z * self.min_patch_size
-                            z_end = z_start + self.min_patch_size
-                            
-                            patch = data[
-                                        :, 
-                                        slice(x_start, x_end), 
-                                        slice(y_start, y_end), 
-                                        slice(z_start, z_end)]
-                            
-                            patch_seg = seg_data[
-                                slice(x_start, x_end), 
-                                slice(y_start, y_end), 
-                                slice(z_start, z_end)]
-                            
-                            
-                            if SAVE:
-                                np.save(loc + self.data_dir_n + sample + "_" +
-                                        str(count_patches) + ".npy", patch)
-                                np.save(loc + self.seg_dir_n + sample + "_" +
-                                        str(count_patches) + ".npy", patch_seg)
-                            
-                            count_patches += 1
+
+                # use patchify to split data into patches
+                data = patchify.patchify(data, (4, self.min_patch_size, self.min_patch_size, self.min_patch_size), step=self.min_patch_size).squeeze(0)  # squeeze 0 to account for channel dim
+                seg_data = patchify.patchify(seg_data, (self.min_patch_size, self.min_patch_size, self.min_patch_size), step=self.min_patch_size)
+
+                # save patches as separate numpy files
+                if SAVE:
+                    for z in range(seg_data.shape[0]):
+                        for y in range(seg_data.shape[1]):
+                            for x in range(seg_data.shape[2]):
+                                np.save(loc + self.data_dir_n + sample + "_"
+                                        + str(z) + "_"
+                                        + str(y) + "_"
+                                        + str(x) + ".npy",
+                                        data[z][y][x])
+                                np.save(loc + self.seg_dir_n + sample + "_"
+                                        + str(z) + "_"
+                                        + str(y) + "_"
+                                        + str(x) + ".npy",
+                                        seg_data[z][y][x])
     
     # run the dataset generation with the () operator
     def __call__(self):
