@@ -127,12 +127,12 @@ if __name__ == "__main__":
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     train_dataset = BraTS20Dataset(
-        set_dir="C:/Users/Milan/Documents/Fast_Datasets/BraTS20/prep/train/",
+        set_dir="G:/Datasets/BraTS20/prep/train/",
         data_dir="data/",
         seg_dir="mask/")
 
     validation_dataset = BraTS20Dataset(
-        set_dir="C:/Users/Milan/Documents/Fast_Datasets/BraTS20/prep/val/",
+        set_dir="G:/Datasets/BraTS20/prep/val/",
         data_dir="data/",
         seg_dir="mask/")
 
