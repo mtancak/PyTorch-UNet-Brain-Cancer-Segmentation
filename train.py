@@ -103,9 +103,11 @@ def train(model, loss_function, optimizer, train_loader, validation_loader):
         if (epoch % SAVE_EVERY_X_EPOCHS == 0 and SAVE_MODEL_LOC):
             torch.save(model.state_dict(), SAVE_MODEL_LOC + str(epoch))
 
+        plt.figure(figsize=(10, 10), dpi=100)
         plt.scatter(range(0, epoch+1), model_metric_scores["accuracy"])
         plt.title("accuracy")
         plt.show()
+        plt.figure(figsize=(10, 10), dpi=100)
         plt.scatter(range(0, epoch+1), model_metric_scores["f1"])
         plt.title("f1")
         plt.show()
