@@ -80,8 +80,6 @@ def train(model, loss_function, optimizer, train_loader, validation_loader):
             seg = onehot_initialization_v2(seg2)
             seg = torch.reshape(seg, (1, 64, 64, 64, 4))
             seg = torch.moveaxis(seg, 4, 1)
-            print("pred shape = " + str(pred.shape))
-            print("seg shape = " + str(seg.shape))
             loss = loss_function(pred, seg)
 
             # make the progress bar display loss
