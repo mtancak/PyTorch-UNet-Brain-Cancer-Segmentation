@@ -14,8 +14,8 @@ from brats20_dataset import BraTS20Dataset
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LEARNING_RATE = 0.0001
 BATCH_SIZE = 1
-NUMBER_OF_EPOCHS = 1000
-SAVE_EVERY_X_EPOCHS = 15
+NUMBER_OF_EPOCHS = 100
+SAVE_EVERY_X_EPOCHS = 1
 SAVE_MODEL_LOC = "./model_"
 LOAD_MODEL_LOC = None
 
