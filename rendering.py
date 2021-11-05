@@ -17,9 +17,13 @@ from vtkmodules.vtkRenderingCore import (
     vtkPolyDataMapper,
     vtkRenderWindow,
     vtkRenderWindowInteractor,
-    vtkRenderer)
+    vtkRenderer,
+    vtkTextActor,
+    vtkTextMapper,
+    vtkTextProperty)
 import vtkmodules.vtkInteractionStyle
 import vtkmodules.vtkRenderingOpenGL2
+import vtkmodules.vtkRenderingFreeType
 
 from model import UNet3D
 
@@ -131,57 +135,54 @@ def main():
     mask_vol_image = get_volume(dir + "mask/", fn, ext)
 
     skin_actor = get_actor(data_vol_image, 'SkinColor', 0.1, 10)
-    edema_actor = get_actor(pred_vol_image, 'seg1c', 0.2, 1)
-    non_enhancing_actor = get_actor(pred_vol_image, 'seg2c', 0.3, 2)
-    gd_enhancing_actor = get_actor(pred_vol_image, 'seg3c', 1.0, 3)
 
-    # Create the renderer, the render window, and the interactor. The renderer
-    # draws into the render window, the interactor enables mouse- and
-    # keyboard-based interaction with the data within the render window.
-    a_renderer = vtkRenderer()
-    ren_win = vtkRenderWindow()
-    ren_win.AddRenderer(a_renderer)
+    pred_edema_actor = get_actor(pred_vol_image, 'seg1c', 0.2, 1)
+    pred_non_enhancing_actor = get_actor(pred_vol_image, 'seg2c', 0.3, 2)
+    pred_gd_enhancing_actor = get_actor(pred_vol_image, 'seg3c', 1.0, 3)
+    pred_actors = [pred_edema_actor, pred_non_enhancing_actor, pred_gd_enhancing_actor]
+
+    mask_edema_actor = get_actor(mask_vol_image, 'seg1c', 0.2, 1)
+    mask_non_enhancing_actor = get_actor(mask_vol_image, 'seg2c', 0.3, 2)
+    mask_gd_enhancing_actor = get_actor(mask_vol_image, 'seg3c', 1.0, 3)
+    mask_actors = [mask_edema_actor, mask_non_enhancing_actor, mask_gd_enhancing_actor]
+
+    # One render window, multiple viewports.
+    rw = vtkRenderWindow()
     iren = vtkRenderWindowInteractor()
-    iren.SetRenderWindow(ren_win)
+    iren.SetRenderWindow(rw)
 
-    # It is convenient to create an initial view of the data. The FocalPoint
-    # and Position form a vector direction. Later on (ResetCamera() method)
-    # this vector is used to position the camera to look at the data in
-    # this direction.
-    a_camera = vtkCamera()
-    a_camera.SetViewUp(0, 0, -1)
-    a_camera.SetPosition(0, -1, 0)
-    a_camera.SetFocalPoint(0, 0, 0)
-    a_camera.ComputeViewPlaneNormal()
-    a_camera.Azimuth(30.0)
-    a_camera.Elevation(30.0)
+    # Define viewport ranges.
+    xmins = [0, .5]
+    xmaxs = [0.5, 1]
+    ymins = [0, 0]
+    ymaxs = [1, 1]
 
-    # Actors are added to the renderer. An initial camera view is created.
-    # The Dolly() method moves the camera towards the FocalPoint,
-    # thereby enlarging the image.
-    a_renderer.AddActor(skin_actor)
-    a_renderer.AddActor(edema_actor)
-    a_renderer.AddActor(non_enhancing_actor)
-    a_renderer.AddActor(gd_enhancing_actor)
-    a_renderer.SetActiveCamera(a_camera)
-    a_renderer.ResetCamera()
-    a_camera.Dolly(1.5)
+    # Share a camera between viewports
+    camera = vtkCamera()
 
-    # Set a background color for the renderer and set the size of the
-    # render window (expressed in pixels).
-    a_renderer.SetBackground(colors.GetColor3d('BkgColor'))
-    ren_win.SetSize(640, 480)
+    for i, (actors, name) in enumerate([tuple((mask_actors, "Target")), tuple((pred_actors, "Prediction"))]):
+        ren = vtkRenderer()
+        rw.AddRenderer(ren)
+        ren.SetViewport(xmins[i], ymins[i], xmaxs[i], ymaxs[i])
 
-    # Note that when camera movement occurs (as it does in the Dolly()
-    # method), the clipping planes often need adjusting. Clipping planes
-    # consist of two planes: near and far along the view direction. The
-    # near plane clips out objects in front of the plane the far plane
-    # clips out objects behind the plane. This way only what is drawn
-    # between the planes is actually rendered.
-    a_renderer.ResetCameraClippingRange()
+        ren.SetActiveCamera(camera)
 
-    # Initialize the event loop and then start it.
-    iren.Initialize()
+        # Create a mapper and act
+        ren.AddActor(skin_actor)
+        ren.AddActor(actors[0])
+        ren.AddActor(actors[1])
+        ren.AddActor(actors[2])
+
+        txt = vtkTextActor()
+        txt.SetInput(name)
+        txt.SetDisplayPosition(600 * i + 300, 30)
+        ren.AddActor(txt)
+
+        ren.ResetCamera()
+
+    rw.Render()
+    rw.SetWindowName('Milan Tancak')
+    rw.SetSize(1200, 600)
     iren.Start()
 
 if __name__ == '__main__':
