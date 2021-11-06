@@ -148,6 +148,8 @@ def main():
 
     # One render window, multiple viewports.
     rw = vtkRenderWindow()
+    rw.SetSize(1200, 600)
+
     iren = vtkRenderWindowInteractor()
     iren.SetRenderWindow(rw)
 
@@ -175,14 +177,14 @@ def main():
 
         txt = vtkTextActor()
         txt.SetInput(name)
-        txt.SetDisplayPosition(600 * i + 300, 30)
+        rw_w, rw_h = rw.GetSize()
+        txt.SetDisplayPosition(int(((rw_w * i) + (rw_w/2.0))/2.0), int(rw_h * 0.1))
         ren.AddActor(txt)
 
         ren.ResetCamera()
 
     rw.Render()
     rw.SetWindowName('Milan Tancak')
-    rw.SetSize(1200, 600)
     iren.Start()
 
 if __name__ == '__main__':
