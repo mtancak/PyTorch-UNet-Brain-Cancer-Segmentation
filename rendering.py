@@ -1,4 +1,5 @@
-# adapted from https://kitware.github.io/vtk-examples/site/Python/Medical/MedicalDemo4/ and https://kitware.github.io/vtk-examples/site/Python/Visualization/MultipleViewports/
+# adapted from https://kitware.github.io/vtk-examples/site/Python/Medical/MedicalDemo4/
+# and https://kitware.github.io/vtk-examples/site/Python/Visualization/MultipleViewports/
 
 import torch
 import patchify
@@ -29,13 +30,13 @@ from model import UNet3D
 
 
 # https://stackoverflow.com/questions/39382412/crop-center-portion-of-a-numpy-image
-def crop_center(img,cropx,cropy,cropz):
+def crop_center(img, cropx, cropy, cropz):
     print("image shape = " + str(img.shape))
-    z,y,x = img.shape[-3:]
-    startx = x//2-(cropx//2)
-    starty = y//2-(cropy//2)
-    startz = z//2-(cropz//2)
-    return img[:, :, startz:startz+cropz, starty:starty+cropy, startx:startx+cropx]
+    z, y, x = img.shape[-3:]
+    startx = x // 2 - (cropx // 2)
+    starty = y // 2 - (cropy // 2)
+    startz = z // 2 - (cropz // 2)
+    return img[:, :, startz:startz + cropz, starty:starty + cropy, startx:startx + cropx]
 
 
 def get_volume(dir, fn, ext, model=None):
@@ -43,7 +44,8 @@ def get_volume(dir, fn, ext, model=None):
     dir_fns = [x.replace(ext, '') for x in dir_fns if fn in x]
     print("dir_fns = " + str(dir_fns))
 
-    patches_ind = np.array([x.split(fn)[1].split("_")[1:] for x in dir_fns], dtype=int)  # splits the grid coordinates in the names into a list of lists
+    # split the grid coordinates in the names into a list of lists
+    patches_ind = np.array([x.split(fn)[1].split("_")[1:] for x in dir_fns], dtype=int)
     patches_dims = patches_ind.max(axis=0) + 1  # account for 0 indexing
 
     patch_shape = np.array(np.load(dir + dir_fns[0] + ext).shape)
@@ -95,6 +97,7 @@ colors.SetColor('seg1c', [0, 0, 255, 50])
 colors.SetColor('seg2c', [0, 255, 0, 50])
 colors.SetColor('seg3c', [255, 0, 0, 50])
 colors.SetColor('BkgColor', [80, 80, 80, 255])
+
 
 def get_actor(image, clr, opacity, threshold):
     # An isosurface, or contour value of 1150 is known to correspond to the
@@ -178,7 +181,7 @@ def main():
         txt = vtkTextActor()
         txt.SetInput(name)
         rw_w, rw_h = rw.GetSize()
-        txt.SetDisplayPosition(int(((rw_w * i) + (rw_w/2.0))/2.0), int(rw_h * 0.1))
+        txt.SetDisplayPosition(int(((rw_w * i) + (rw_w / 2.0)) / 2.0), int(rw_h * 0.1))
         ren.AddActor(txt)
 
         ren.ResetCamera()
@@ -186,6 +189,7 @@ def main():
     rw.Render()
     rw.SetWindowName('Milan Tancak')
     iren.Start()
+
 
 if __name__ == '__main__':
     main()

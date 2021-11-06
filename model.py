@@ -137,4 +137,3 @@ if __name__ == "__main__":
     print("output shape x = " + str(test_model(x).shape))
     print("output shape y = " + str(test_model(y).shape))
     print("output shape z = " + str(test_model(z).shape))
-    

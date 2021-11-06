@@ -10,7 +10,6 @@ from tqdm import tqdm
 from model import UNet3D
 from brats20_dataset import BraTS20Dataset
 
-
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LEARNING_RATE = 0.0001
 BATCH_SIZE = 1
@@ -20,13 +19,17 @@ SAVE_MODEL_LOC = "./model_"
 LOAD_MODEL_LOC = None
 
 
-# converts an array into a one hot vector. Source: https://stackoverflow.com/questions/36960320/convert-a-2d-matrix-to-a-3d-one-hot-matrix-numpy
+# converts an array into a one hot vector.
+# Source: https://stackoverflow.com/questions/36960320/convert-a-2d-matrix-to-a-3d-one-hot-matrix-numpy
 def onehot_initialization_v2(a, ncols=4):
     out = torch.zeros(a.numel(), ncols)
     out[torch.arange(a.numel()), a.ravel()] = 1
     return out.to(device=DEVICE)
 
-# the f1 score in this paper uses a slightly modified way of computing the union which should result in a better f1 score for datasets with large class imbalance
+
+# the f1 score in this paper uses a slightly modified way of computing the union
+# which should result in a better f1 score for datasets with large class imbalance by penalising
+# the model when it starts to predict the background class more for a higher score
 # https://arxiv.org/pdf/1606.04797.pdf
 def f1(probability, targets):
     probability = probability.flatten()
@@ -37,6 +40,7 @@ def f1(probability, targets):
     union = (probability * probability).sum() + (targets * targets).sum()
     dice_score = intersection / union
     return 1.0 - dice_score
+
 
 # measures the f1 score of predictions at the end of an epoch
 def f1_metric(model, loader):
@@ -49,6 +53,7 @@ def f1_metric(model, loader):
     f1_score /= len(loader)
 
     return f1_score.item()
+
 
 # measures accuracy of predictions at the end of an epoch (bad for semantic segmentation)
 def accuracy(model, loader, prin=False):
@@ -65,6 +70,7 @@ def accuracy(model, loader, prin=False):
 
     return (correct_pixels / total_pixels).item()
 
+
 # a training loop that runs a number of training epochs on a model
 def train(model, loss_function, optimizer, train_loader, validation_loader):
     model_metric_scores = {}
@@ -74,7 +80,7 @@ def train(model, loss_function, optimizer, train_loader, validation_loader):
     for epoch in range(NUMBER_OF_EPOCHS):
         model.train()
         progress = tqdm(train_loader)
-        
+
         for batch, (data, seg2) in enumerate(progress):
             pred = model(data)
             seg = onehot_initialization_v2(seg2)
@@ -83,7 +89,7 @@ def train(model, loss_function, optimizer, train_loader, validation_loader):
             loss = loss_function(pred, seg)
 
             # make the progress bar display loss
-            progress.set_postfix(loss = loss.item())
+            progress.set_postfix(loss=loss.item())
 
             # back propagation
             optimizer.zero_grad()  # zeros out the gradients from previous batch
@@ -98,15 +104,15 @@ def train(model, loss_function, optimizer, train_loader, validation_loader):
         print("Accuracy for epoch (" + str(epoch) + ") is: " + str(model_metric_scores["accuracy"][-1]))
         print("F1 Score for epoch (" + str(epoch) + ") is: " + str(model_metric_scores["f1"][-1]))
 
-        if (epoch % SAVE_EVERY_X_EPOCHS == 0 and SAVE_MODEL_LOC):
+        if (epoch % SAVE_EVERY_X_EPOCHS == 0) and SAVE_MODEL_LOC:
             torch.save(model.state_dict(), SAVE_MODEL_LOC + str(epoch))
 
         plt.figure(figsize=(10, 10), dpi=100)
-        plt.scatter(range(0, epoch+1), model_metric_scores["accuracy"])
+        plt.scatter(range(0, epoch + 1), model_metric_scores["accuracy"])
         plt.title("accuracy")
         plt.show()
         plt.figure(figsize=(10, 10), dpi=100)
-        plt.scatter(range(0, epoch+1), model_metric_scores["f1"])
+        plt.scatter(range(0, epoch + 1), model_metric_scores["f1"])
         plt.title("f1")
         plt.show()
 
@@ -118,7 +124,7 @@ if __name__ == "__main__":
     # create/load model
     model = UNet3D(in_channels=4, out_channels=4).to(DEVICE)
 
-    if LOAD_MODEL_LOC != None:
+    if LOAD_MODEL_LOC:
         model.load_state_dict(torch.load(LOAD_MODEL_LOC))
 
     loss_function = f1
