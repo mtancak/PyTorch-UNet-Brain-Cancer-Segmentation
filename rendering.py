@@ -29,36 +29,32 @@ import vtkmodules.vtkRenderingFreeType
 from model import UNet3D
 
 
-# https://stackoverflow.com/questions/39382412/crop-center-portion-of-a-numpy-image
-def crop_center(img, cropx, cropy, cropz):
-    print("image shape = " + str(img.shape))
-    z, y, x = img.shape[-3:]
-    startx = x // 2 - (cropx // 2)
-    starty = y // 2 - (cropy // 2)
-    startz = z // 2 - (cropz // 2)
-    return img[:, :, startz:startz + cropz, starty:starty + cropy, startx:startx + cropx]
-
-
-def get_volume(dir, fn, ext, model=None):
-    dir_fns = os.listdir(dir)
+def get_volume(directory, fn, ext, model=None):
+    dir_fns = os.listdir(directory)
     dir_fns = [x.replace(ext, '') for x in dir_fns if fn in x]
     print("dir_fns = " + str(dir_fns))
 
     # split the grid coordinates in the names into a list of lists
     patches_ind = np.array([x.split(fn)[1].split("_")[1:] for x in dir_fns], dtype=int)
+    # get the highest indices in each dimension, giving us the patch grid shape
     patches_dims = patches_ind.max(axis=0) + 1  # account for 0 indexing
 
-    patch_shape = np.array(np.load(dir + dir_fns[0] + ext).shape)
+    # get the shape of the first entry, assume the rest are the same
+    patch_shape = np.array(np.load(directory + dir_fns[0] + ext).shape)
 
+    # concatenate the two arrays, this will be the shape of our grid
     patches_shape = np.concatenate((patches_dims, patch_shape), axis=0)
 
     patches = np.zeros(patches_shape)
 
+    # load the data
     ind_fn_pairs = zip(patches_ind, dir_fns)
     for i, f in ind_fn_pairs:
-        patches[tuple(i)] = np.load(dir + f + ext)
+        patches[tuple(i)] = np.load(directory + f + ext)
 
+    # if true, we loaded in data, not a mask
     if len(patch_shape) % 2 == 0:
+        # given a model, make predictions
         if model:
             for z in range(patches.shape[0]):
                 for y in range(patches.shape[1]):
@@ -66,6 +62,7 @@ def get_volume(dir, fn, ext, model=None):
                         patches[z][y][x] = model.forward(
                             torch.tensor(patches[z][y][x]).unsqueeze(0).cuda().float()).detach().cpu().numpy()
         patches = np.moveaxis(patches, 3, 0)
+        # unpatchify the data
         vol = []
         for c in patches:
             vol.append(patchify.unpatchify(c, tuple(patch_shape[1:] * patches_dims)))
@@ -74,7 +71,7 @@ def get_volume(dir, fn, ext, model=None):
             vol = np.argmax(vol, axis=0)
         else:
             vol = vol[0]
-    else:
+    else:  # else we loaded in a mask, so simlpy unpatchify it
         vol = patchify.unpatchify(patches, tuple(patch_shape * patches_dims))
 
     vol_image = vtkImageData()
@@ -82,6 +79,7 @@ def get_volume(dir, fn, ext, model=None):
     vol_image.SetSpacing(1.0, 1.0, 1.0)
     vol_image.AllocateScalars(VTK_UNSIGNED_SHORT, 1)
 
+    # inserts data into our vtkImageData volume
     for z in range(vol.shape[0]):
         for y in range(vol.shape[1]):
             for x in range(vol.shape[2]):
@@ -93,9 +91,9 @@ def get_volume(dir, fn, ext, model=None):
 colors = vtkNamedColors()
 
 colors.SetColor('SkinColor', [240, 184, 160, 50])
-colors.SetColor('seg1c', [0, 0, 255, 50])
-colors.SetColor('seg2c', [0, 255, 0, 50])
-colors.SetColor('seg3c', [255, 0, 0, 50])
+colors.SetColor('seg1c', [0, 0, 255, 50])  # peritumoral edema
+colors.SetColor('seg2c', [0, 255, 0, 50])  # non-enhancing tumor core
+colors.SetColor('seg3c', [255, 0, 0, 50])  # GD-enhancing tumor
 colors.SetColor('BkgColor', [80, 80, 80, 255])
 
 
