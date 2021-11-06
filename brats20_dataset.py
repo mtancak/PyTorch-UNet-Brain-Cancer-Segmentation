@@ -20,7 +20,8 @@ class BraTS20Dataset(Dataset):
     
     def __len__(self):
         return len(self.list_samples)
-    
+
+    # generate the file paths for data+mask, then load them in, move them to the right device and return them
     def __getitem__(self, index):
         data_img_path = self.set_dir + self.data_dir + self.list_samples[index]
         seg_img_path = self.set_dir + self.seg_dir + self.list_samples[index]
