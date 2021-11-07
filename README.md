@@ -10,9 +10,10 @@ You can download the dataset I used from https://www.kaggle.com/awsaf49/brats20-
 
 ## Basic Steps To Run The Code
 1. Download the Data
-2. Run prepare_dataset.py
-3. Run train.py
-4. Optionally render output by running rendering.py
+2. Modify hyperparameters.txt to fit your needs (at minimum, adjust the directories)
+3. Run prepare_dataset.py
+4. Run train.py
+5. Optionally render output by running rendering.py
 
 ## Model
 I have used a 3D UNet for this example. UNets were originally developed for use in medical computer vision, so it’s naturally a decent fit. I have kept to the original paper’s UNet architecture, thus the model has 64, 128, 256, 512 and 1024 features in each depth level. In my code, I made it trivial to update these numbers. 
