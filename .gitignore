@@ -1,6 +1,5 @@
 .idea/
 __pycache__/
-notepad.py
 sample_names.npy
 model_*
-eval_model.py
+hyperparameters.txt
