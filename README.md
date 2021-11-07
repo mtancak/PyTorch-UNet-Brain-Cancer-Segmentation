@@ -6,7 +6,7 @@ You can download the dataset I used from https://www.kaggle.com/awsaf49/brats20-
 
 ## Output Examples
 ![](Example.png)
-![](Example2.png)
+![](Example_2.png)
 
 ## Basic Steps To Run The Code
 1. Download the Data
