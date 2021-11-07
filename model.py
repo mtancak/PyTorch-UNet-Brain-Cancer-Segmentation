@@ -4,7 +4,7 @@ import torch.nn as nn
 
 # returns a modulelist used for a single layer of a UNET architecture
 def double_conv_3d(in_features, out_features):
-    return nn.ModuleList({
+    return nn.ModuleList([
         nn.Conv3d(
             in_channels=in_features,
             out_channels=out_features,
@@ -22,7 +22,7 @@ def double_conv_3d(in_features, out_features):
                   bias=False),
         nn.BatchNorm3d(out_features),
         nn.ReLU(inplace=True)
-    })
+    ])
 
 
 class UNet3D(nn.Module):
