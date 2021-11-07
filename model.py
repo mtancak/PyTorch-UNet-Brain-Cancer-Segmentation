@@ -35,11 +35,12 @@ class UNet3D(nn.Module):
         super(UNet3D, self).__init__()
 
         # initialise member vars
-        if n_features is None:
-            n_features = [64, 128, 256, 512]
         self.in_channels = in_channels
         self.out_channels = out_channels
-        self.n_features = n_features
+        if n_features is None:
+            self.n_features = [64, 128, 256, 512]
+        else:
+            self.n_features = n_features
 
         # generate layers
         self.contracting_layers = nn.ModuleList()
