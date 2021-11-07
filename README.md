@@ -9,6 +9,7 @@ You can download the dataset I used from https://www.kaggle.com/awsaf49/brats20-
 ![](Images/Example_2.png)
 
 ## Basic Steps To Run The Code
+*I recommend using Spyder or PyCharm in scientific mode, as after each epoch train.py prints out graphs of F1 and accuracy*
 1. Download the Data
 2. Modify hyperparameters.txt to fit your needs (at minimum, adjust the directories)
 3. Run prepare_dataset.py
