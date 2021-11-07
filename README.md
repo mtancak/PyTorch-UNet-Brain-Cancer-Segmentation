@@ -5,14 +5,15 @@ This is a basic example of a PyTorch implementation of UNet from scratch. I've u
 You can download the dataset I used from https://www.kaggle.com/awsaf49/brats20-dataset-training-validation. 
 
 ## Output Examples
-![](Example.png)
-![](Example_2.png)
+![](Images/Example.png)
+![](Images/Example_2.png)
 
 ## Basic Steps To Run The Code
 1. Download the Data
-2. Run prepare_dataset.py
-3. Run train.py
-4. Optionally render output by running rendering.py
+2. Modify hyperparameters.txt to fit your needs (at minimum, adjust the directories)
+3. Run prepare_dataset.py
+4. Run train.py
+5. Optionally render output by running rendering.py
 
 ## Model
 I have used a 3D UNet for this example. UNets were originally developed for use in medical computer vision, so it’s naturally a decent fit. I have kept to the original paper’s UNet architecture, thus the model has 64, 128, 256, 512 and 1024 features in each depth level. In my code, I made it trivial to update these numbers. 
@@ -28,5 +29,5 @@ To prepare the dataset, I’ve filtered out all of the entries of 100% healthy s
 Originally, I have cropped out 64x64x64 cubes around the tumor areas only. Although this worked well for modelling the tumor areas, the model ended up being really bad at identifying healthy areas of the brain and also labelling the “void” in the CT machine around the person, which meant that the rendered output was very poor. By removing this restriction, but still filtering out 100% healthy CTs, I achieved a fairly accurate model without a complicated training process. 
 
 #### Examples of bad output when previously training the model having cropped out only the tumors in the training data
-![](Bad_Preparation_1.png)
-![](Bad_Preparation_2.png)
+![](Images/Bad_Preparation_1.png)
+![](Images/Bad_Preparation_2.png)
