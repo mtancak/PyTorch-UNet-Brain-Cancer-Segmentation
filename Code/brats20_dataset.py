@@ -4,6 +4,8 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 
+from load_hyperparameters import hp
+
 
 class BraTS20Dataset(Dataset):
     def __init__(self, set_dir, data_dir, seg_dir):
@@ -34,9 +36,9 @@ class BraTS20Dataset(Dataset):
 
 if __name__ == "__main__":
     ds = BraTS20Dataset(
-        set_dir="C:/Users/Milan/Documents/Fast_Datasets/BraTS20/prep/train/",
-        data_dir="data/",
-        seg_dir="mask/")
+        set_dir=hp["training_dir"],
+        data_dir=hp["data_dir_name"],
+        seg_dir=hp["seg_dir_name"])
     plt.imshow(ds[0][0][0][10].cpu().numpy())
     plt.show()
     plt.imshow(ds[0][0][1][10].cpu().numpy())

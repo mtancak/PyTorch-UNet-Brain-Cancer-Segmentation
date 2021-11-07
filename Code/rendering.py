@@ -27,12 +27,12 @@ import vtkmodules.vtkRenderingOpenGL2
 import vtkmodules.vtkRenderingFreeType
 
 from model import UNet3D
+from load_hyperparameters import hp
 
 
 def get_volume(directory, fn, ext, model=None):
     dir_fns = os.listdir(directory)
     dir_fns = [x.replace(ext, '') for x in dir_fns if fn in x]
-    print("dir_fns = " + str(dir_fns))
 
     # split the grid coordinates in the names into a list of lists
     patches_ind = np.array([x.split(fn)[1].split("_")[1:] for x in dir_fns], dtype=int)
@@ -71,7 +71,7 @@ def get_volume(directory, fn, ext, model=None):
             vol = np.argmax(vol, axis=0)
         else:
             vol = vol[0]
-    else:  # else we loaded in a mask, so simlpy unpatchify it
+    else:  # else we loaded in a mask, so simply unpatchify it
         vol = patchify.unpatchify(patches, tuple(patch_shape * patches_dims))
 
     vol_image = vtkImageData()
@@ -127,13 +127,13 @@ def main():
     model = UNet3D(in_channels=4, out_channels=4).to("cuda")
     model.load_state_dict(torch.load("./model_10"))
 
-    dir = "C:/Users/Milan/Documents/Fast_Datasets/BraTS20-Long/prep/val/"
+    dir = hp["validation_dir"]
     fn = "BraTS20_Training_004"
     ext = ".npy"
 
-    data_vol_image = get_volume(dir + "data/", fn, ext)
-    pred_vol_image = get_volume(dir + "data/", fn, ext, model=model)
-    mask_vol_image = get_volume(dir + "mask/", fn, ext)
+    data_vol_image = get_volume(dir + hp["data_dir_name"], fn, ext)
+    pred_vol_image = get_volume(dir + hp["data_dir_name"], fn, ext, model=model)
+    mask_vol_image = get_volume(dir + hp["seg_dir_name"], fn, ext)
 
     skin_actor = get_actor(data_vol_image, 'SkinColor', 0.1, 10)
 

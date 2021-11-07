@@ -9,6 +9,7 @@ from tqdm import tqdm
 
 from model import UNet3D
 from brats20_dataset import BraTS20Dataset
+from load_hyperparameters import hp
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LEARNING_RATE = 0.0001
@@ -73,9 +74,7 @@ def accuracy(model, loader, prin=False):
 
 # a training loop that runs a number of training epochs on a model
 def train(model, loss_function, optimizer, train_loader, validation_loader):
-    model_metric_scores = {}
-    model_metric_scores["accuracy"] = []
-    model_metric_scores["f1"] = []
+    model_metric_scores = {"accuracy": [], "f1": []}
 
     for epoch in range(NUMBER_OF_EPOCHS):
         model.train()
@@ -131,14 +130,14 @@ if __name__ == "__main__":
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     train_dataset = BraTS20Dataset(
-        set_dir="C:/Users/Milan/Documents/Fast_Datasets/BraTS20-Long/prep/train/",
-        data_dir="data/",
-        seg_dir="mask/")
+        set_dir=hp["training_dir"],
+        data_dir=hp["data_dir_name"],
+        seg_dir=hp["seg_dir_name"])
 
     validation_dataset = BraTS20Dataset(
-        set_dir="C:/Users/Milan/Documents/Fast_Datasets/BraTS20-Long/prep/val/",
-        data_dir="data/",
-        seg_dir="mask/")
+        set_dir=hp["validation_dir"],
+        data_dir=hp["data_dir_name"],
+        seg_dir=hp["seg_dir_name"])
 
     train_loader = DataLoader(
         train_dataset,

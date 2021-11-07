@@ -1,0 +1,12 @@
+raw_data_dir:G:/Datasets/BraTS/raw/MICCAI_BraTS2020_TrainingData/data/
+training_dir:C:/Users/Milan/Documents/Fast_Datasets/BraTS20-Long/prep/train/
+validation_dir:C:/Users/Milan/Documents/Fast_Datasets/BraTS20-Long/prep/val/
+data_dir_name:data/
+seg_dir_name:mask/
+channel_names:flair,t1,t1ce,t2
+seg_channel_name:seg
+min_patch_size:64
+load_data:False
+do_preprocess:False
+bg_threshold:0.99
+save_thresholded_sample_names:True
