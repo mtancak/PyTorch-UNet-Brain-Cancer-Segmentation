@@ -4,8 +4,9 @@ This is a basic example of a PyTorch implementation of UNet from scratch. I've u
 
 You can download the dataset I used from https://www.kaggle.com/awsaf49/brats20-dataset-training-validation. 
 
-## Output Example
+## Output Examples
 ![](Example.png)
+![](Example2.png)
 
 ## Basic Steps To Run The Code
 1. Download the Data
