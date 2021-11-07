@@ -1,6 +1,6 @@
 # PyTorch-UNet-BraTS20
 ## Introduction
-This is a basic example of a PyTorch implementation of UNet from scratch. I've used it to segment the BraTS 2020 dataset, which contains CT scans of brains with tumors. As such, each entry has a list of 2D X-Ray slices that can be put together to form a volume. I have used VTK to render the mask vs. the prediction in 3D and thus show the usefulness of this approach. The model stops learning after only a few epochs, so for actual use, as a first cheap improvement, I'd recommend lowering the learning rate or increasing the amount of parameters in the network.
+This is a basic example of a PyTorch implementation of UNet from scratch. I've used it to segment the BraTS 2020 dataset, which contains CT scans of brains with tumors. As such, each entry has a list of 2D X-Ray slices that can be put together to form a volume. I have used VTK to render the mask vs. the prediction in 3D and thus show the usefulness of this approach. The model stops learning after only a few epochs, so for actual use, as a first cheap improvement, I'd recommend lowering the learning rate or increasing the amount of parameters in the network. The model achieves 0.75 F1 score and 98% accuracy (not very useful for semantic segmentation).
 
 You can download the dataset I used from https://www.kaggle.com/awsaf49/brats20-dataset-training-validation. 
 
@@ -8,10 +8,10 @@ You can download the dataset I used from https://www.kaggle.com/awsaf49/brats20-
 ![](Example.png)
 
 ## Basic Steps To Run The Code
-Download the Data
-Run prepare_dataset.py
-Run train.py
-Optionally render output by running rendering.py
+1. Download the Data
+2. Run prepare_dataset.py
+3. Run train.py
+4. Optionally render output by running rendering.py
 
 ## Model
 I have used a 3D UNet for this example. UNets were originally developed for use in medical computer vision, so it’s naturally a decent fit. I have kept to the original paper’s UNet architecture, thus the model has 64, 128, 256, 512 and 1024 features in each depth level. In my code, I made it trivial to update these numbers. 
