@@ -128,7 +128,7 @@ def main():
     model.load_state_dict(torch.load("./model_10"))
 
     dir = hp["validation_dir"]
-    fn = "BraTS20_Training_004"
+    fn = hp["rendering_sample_name"]
     ext = ".npy"
 
     data_vol_image = get_volume(dir + hp["data_dir_name"], fn, ext)
