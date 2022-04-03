@@ -25,7 +25,7 @@ with open('../hyperparameters.txt') as f:
         else:
             value = value.strip()
 
-        if ("dir" in key) and ("name" not in key):
+        if ("dir" in key) and ("name" not in key) and ("comment" not in key):
             if not os.path.isdir(value):
                 os.mkdir(value)
         elif value == "True":
@@ -34,4 +34,10 @@ with open('../hyperparameters.txt') as f:
             value = False
         else:
             value = hp_convert_from_string(value)
+        
+        if key == "channel_names" and isinstance(value, str):
+            value = [value]
+        if key == "num_classes" and isinstance(value, str):
+            value = int(value)
+        
         hp[key] = value

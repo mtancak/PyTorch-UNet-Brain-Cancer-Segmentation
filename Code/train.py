@@ -16,13 +16,13 @@ LEARNING_RATE = 0.0001
 BATCH_SIZE = 1
 NUMBER_OF_EPOCHS = 100
 SAVE_EVERY_X_EPOCHS = 1
-SAVE_MODEL_LOC = "./model_"
+SAVE_MODEL_LOC = "None" # "./model_"
 LOAD_MODEL_LOC = None
 
 
 # converts an array into a one hot vector.
 # Source: https://stackoverflow.com/questions/36960320/convert-a-2d-matrix-to-a-3d-one-hot-matrix-numpy
-def onehot_initialization_v2(a, ncols=4):
+def onehot_initialization_v2(a, ncols=hp["num_classes"]):
     out = torch.zeros(a.numel(), ncols)
     out[torch.arange(a.numel()), a.ravel()] = 1
     return out.to(device=DEVICE)
@@ -82,8 +82,8 @@ def train(model, loss_function, optimizer, train_loader, validation_loader):
 
         for batch, (data, seg2) in enumerate(progress):
             pred = model(data)
-            seg = onehot_initialization_v2(seg2)
-            seg = torch.reshape(seg, (1, 64, 64, 64, 4))
+            seg = onehot_initialization_v2(torch.flatten(seg2))
+            seg = torch.reshape(seg, (1, 64, 64, 64, hp["num_classes"]))
             seg = torch.moveaxis(seg, 4, 1)
             loss = loss_function(pred, seg)
 
@@ -121,7 +121,7 @@ def train(model, loss_function, optimizer, train_loader, validation_loader):
 
 if __name__ == "__main__":
     # create/load model
-    model = UNet3D(in_channels=4, out_channels=4).to(DEVICE)
+    model = UNet3D(in_channels=len(hp["channel_names"]), out_channels=4).to(DEVICE)
 
     if LOAD_MODEL_LOC:
         model.load_state_dict(torch.load(LOAD_MODEL_LOC))

@@ -76,6 +76,7 @@ class DatasetCreator:
             else:
                 samples = val_samples
                 loc = hp["validation_dir"]
+                
             for sample in (tqdm(samples)):
                 seg_data, data = self.load_data(sample)
 
@@ -83,7 +84,7 @@ class DatasetCreator:
                     continue
 
                 # use patchify to split data into patches
-                data = patchify.patchify(data, (4, hp["min_patch_size"], hp["min_patch_size"], hp["min_patch_size"]),
+                data = patchify.patchify(data, (len(hp["channel_names"]), hp["min_patch_size"], hp["min_patch_size"], hp["min_patch_size"]),
                                          step=hp["min_patch_size"]).squeeze(0)  # squeeze 0 to account for channel dim
                 seg_data = patchify.patchify(seg_data, (hp["min_patch_size"], hp["min_patch_size"], hp["min_patch_size"]),
                                              step=hp["min_patch_size"])
@@ -108,12 +109,12 @@ class DatasetCreator:
     def __call__(self):
 
 
-        if self.load_data:
+        if hp["load_data"]:
             self.sample_names = np.load("sample_names.npy")
         else:
             self.sample_names = os.listdir(hp["raw_data_dir"])
 
-        if hp["do_prepocess"] == "Compute":
+        if hp["do_preprocess"] == "Compute":
             self.preprocess()
         self.save()
 

@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 
+from load_hyperparameters import hp
+
 
 # returns a modulelist used for a single layer of a UNET architecture
 def double_conv_3d(in_features, out_features):
@@ -28,7 +30,7 @@ def double_conv_3d(in_features, out_features):
 class UNet3D(nn.Module):
     def __init__(
             self,
-            in_channels=4,  # number of channels: t1, t1ce, t2, flair
+            in_channels=len(hp["channel_names"]),  # number of channels: t1, t1ce, t2, flair
             out_channels=4,  # number of classes: background, edema, non-enhancing, GD-enhancing
             n_features=None,
             activation=nn.Sigmoid()):  # default for UNET
